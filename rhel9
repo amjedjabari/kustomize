@@ -1,0 +1,43 @@
+FROM ubi9
+
+LABEL maintainer="ajabari <red80276@adobe.com>"
+
+LABEL com.redhat.component="ubi9-container" \
+      name="ubi9" \
+      version="9.2"
+WORKDIR "/tmp"
+RUN dnf update -y && \
+  dnf install -y git wget zip && \
+  wget https://releases.hashicorp.com/terraform/1.5.5/terraform_1.5.5_linux_amd64.zip \
+  && unzip terraform_1.5.5_linux_amd64.zip -d /usr/bin \
+  && rm terraform_1.5.5_linux_amd64.zip \
+  && wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.11.26/openshift-client-linux-4.11.26.tar.gz \
+  && tar xzf openshift-client-linux-4.11.26.tar.gz oc kubectl -C /usr/bin \
+  && rm openshift-client-linux-4.11.26.tar.gz \
+  && wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.1.1/kustomize_v5.1.1_linux_amd64.tar.gz \
+  && tar xzvf kustomize_v5.1.1_linux_amd64.tar.gz -C /usr/bin \
+  && rm kustomize_v5.1.1_linux_amd64.tar.gz \
+  && wget https://releases.hashicorp.com/vault/1.14.1/vault_1.14.1_darwin_amd64.zip \
+  && unzip vault_1.14.1_darwin_amd64.zip -d /usr/bin \
+  && rm vault_1.14.1_darwin_amd64.zip \
+  && dnf -y clean all 
+ 
+#label for EULA
+LABEL com.redhat.license_terms="https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI"
+
+#labels for container catalog
+LABEL summary="Provides the latest release of Red Hat Universal Base Image 9."
+LABEL description="The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly."
+LABEL io.k8s.display-name="Red Hat Universal Base Image 9"
+LABEL io.openshift.expose-services=""
+LABEL io.openshift.tags="base rhel9"
+
+ENV container oci
+ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+CMD ["/bin/bash"]
+
+RUN rm -rf /var/log/*
+#rhbz 1609043
+RUN mkdir -p /var/log/rhsm
+
